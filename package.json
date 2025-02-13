@@ -1,6 +1,6 @@
 {
   "name": "baileys-decorators",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A TypeScript library for event handling with Baileys",
   "keywords": [
     "baileys",
@@ -29,8 +29,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist/*.js",
-    "dist/*.d.ts"
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
   ],
   "trustedDependencies": [
     "protobufjs"
