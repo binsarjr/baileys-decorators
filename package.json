@@ -1,0 +1,42 @@
+{
+  "name": "baileys-decorators",
+  "version": "0.0.1",
+  "description": "A TypeScript library for event handling with Baileys",
+  "keywords": [
+    "baileys",
+    "decorators",
+    "typescript",
+    "whatsapp",
+    "bot"
+  ],
+  "homepage": "https://github.com/binsarjr/baileys-decorators",
+  "bugs": "https://github.com/binsarjr/baileys-decorators/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/binsarjr/baileys-decorators.git"
+  },
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "reflect-metadata": "^0.2.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "@whiskeysockets/baileys": "^6.0.0",
+    "baileys": "^6.0.0"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/*.js",
+    "dist/*.d.ts"
+  ],
+  "trustedDependencies": [
+    "protobufjs"
+  ],
+  "scripts": {
+    "build": "bun build --target=node ./src/index.ts --outfile=dist/index.js && bun run build:declaration",
+    "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json"
+  }
+}
