@@ -16,7 +16,7 @@
 ## 📦 Installation
 
 ```sh
-bun add baileys-decorator
+bun add baileys-decorators
 ```
 
 ## 🛠 Usage
@@ -24,7 +24,7 @@ bun add baileys-decorator
 ### **1. Load Decorators Automatically**
 
 ```typescript
-import { BaileysDecorator } from 'baileys-decorator';
+import { BaileysDecorator } from 'baileys-decorators';
 
 await BaileysDecorator.loadDecorators([
   './baileys-decorators/example/**/*.action.ts'
@@ -62,7 +62,7 @@ BaileysDecorator.bind(socket);
 Bind a method to a Baileys event:
 
 ```typescript
-import { OnEvent, Context } from 'baileys-decorator';
+import { OnEvent, Context } from 'baileys-decorators';
 
 class WhatsAppBot {
   @OnEvent('messages.upsert')
@@ -77,7 +77,7 @@ class WhatsAppBot {
 Trigger actions based on text patterns:
 
 ```typescript
-import { OnText } from 'baileys-decorator';
+import { OnText } from 'baileys-decorators';
 
 class BotCommands {
   @OnText('/hello')
@@ -92,7 +92,7 @@ class BotCommands {
 Inject dependencies into event handlers while maintaining `this` context:
 
 ```typescript
-import { Socket, Context, OnEvent, OnText } from 'baileys-decorator';
+import { Socket, Context, OnEvent, OnText } from 'baileys-decorators';
 
 class Bot {
   @OnEvent('messages.upsert')
