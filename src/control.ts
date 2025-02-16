@@ -134,7 +134,6 @@ export class BaileysDecorator {
 		let allDecorators: Record<string, any> = {};
 
 		for (const pattern of patterns) {
-			console.log(pattern);
 			const glob = new Bun.Glob(pattern);
 
 			for await (const filepath of glob.scan()) {
