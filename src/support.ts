@@ -1,4 +1,5 @@
-import type { proto, WAProto } from "baileys";
+import type { proto, WAMessage, WAProto } from "baileys";
+import type { SocketClient } from "./types";
 
 export const getMessageCaption = (message: proto.IMessage) => {
 	if (!message) return "";
@@ -30,4 +31,10 @@ export const getContentType = (content: WAProto.IMessage | undefined) => {
 		);
 		return key as keyof typeof content;
 	}
+};
+
+export const createGuard = (
+	callback: (socket: SocketClient, msg: WAMessage) => Promise<boolean> | boolean
+) => {
+	return callback;
 };

@@ -6,7 +6,7 @@ import type {
 } from "baileys";
 
 export type SocketClient =
-	| (WASocket & {
+	| WASocket & {
 			/**
 			 * Reply to a message
 			 *
@@ -35,5 +35,4 @@ export type SocketClient =
 			reactToDone: () => Promise<WAProto.WebMessageInfo | undefined>;
 			reactToFailed: () => Promise<WAProto.WebMessageInfo | undefined>;
 			reactToInvalid: () => Promise<WAProto.WebMessageInfo | undefined>;
-	  })
-	| WASocket;
+	  };

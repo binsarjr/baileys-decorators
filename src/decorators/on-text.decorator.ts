@@ -4,7 +4,7 @@ import { textEventStore, type TextMatchType } from "../store/text-event-store";
 import type { SocketClient } from "../types";
 import type { DecoratorParameters } from "./types";
 
-export type Middleware = (
+export type Guard = (
 	socket: SocketClient,
 	msg: WAMessage
 ) => Promise<boolean> | boolean;
@@ -12,7 +12,7 @@ export type Middleware = (
 export interface OnTextOptions {
 	matchType?: TextMatchType;
 	priority?: number;
-	middleware?: Middleware[];
+	guard?: Guard[];
 }
 
 export const OnText = (
@@ -58,6 +58,7 @@ export const OnText = (
 				parameters: dynamicParameters,
 				matchType,
 				classRef: target.constructor,
+				guard: options.guard || [],
 			});
 
 			textEventStore.set(

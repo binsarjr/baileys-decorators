@@ -11,31 +11,6 @@ const injectFunctionMessage = (
 	message: WAMessage | undefined
 ) => {
 	if (!message) {
-		socket.reply = async (content, options) => {
-			throw new Error("This Method only work with OnText Decorator");
-		};
-
-		socket.replyWithQuote = async (content, options) => {
-			throw new Error("This Method only work with OnText Decorator");
-		};
-
-		socket.replyWithQuoteInPrivate = async (content, options) => {
-			throw new Error("This Method only work with OnText Decorator");
-		};
-		socket.react = async (emoji) => {
-			throw new Error("This Method only work with OnText Decorator");
-		};
-
-		socket.reactToDone = async () => {
-			throw new Error("This Method only work with OnText Decorator");
-		};
-		socket.reactToProcessing = async () => {
-			throw new Error("This Method only work with OnText Decorator");
-		};
-		socket.reactToFailed = async () => {
-			throw new Error("This Method only work with OnText Decorator");
-		};
-
 		return socket;
 	}
 
@@ -129,6 +104,9 @@ export class BaileysDecorator {
 	static async loadDecorators(
 		patterns: string[] = [],
 		loader: (files: Record<string, any>) => void = (files) => {
+			Object.keys(files).forEach((key) =>
+				console.log(`✅ Loaded ${key} decorator`)
+			);
 			console.log(`✅ Loaded ${Object.keys(files).length} decorators`);
 		}
 	) {
@@ -192,6 +170,7 @@ export class BaileysDecorator {
 							matchType,
 							method,
 							parameters,
+							guard: guards = [],
 							classRef: target,
 						} of handlers) {
 							let isMatch = false;
@@ -232,7 +211,17 @@ export class BaileysDecorator {
 								});
 
 								try {
-									await method.bind(instance)(...args);
+									let passed = guards.length === 0;
+									for (const guard of guards) {
+										passed = await guard(
+											socket as unknown as SocketClient,
+											message
+										);
+										if (!passed) {
+											continue;
+										}
+									}
+									if (passed) await method.bind(instance)(...args);
 								} catch (error) {
 									console.error(error);
 								}

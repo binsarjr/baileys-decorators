@@ -1,4 +1,4 @@
-import type { Middleware } from "../decorators/on-text.decorator";
+import type { Guard } from "../decorators/on-text.decorator";
 import type { DecoratorParameters } from "../decorators/types";
 
 export type TextMatchType =
@@ -16,6 +16,6 @@ export const textEventStore = new Map<
 		parameters: { [key: string]: DecoratorParameters };
 		matchType: TextMatchType;
 		classRef: any;
-		middleware?: Middleware[];
+		guard?: Guard[];
 	}>
 >();
