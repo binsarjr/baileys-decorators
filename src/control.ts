@@ -3,6 +3,7 @@ import type { WAMessage, WASocket } from "baileys";
 import { DecoratorParameters } from "./decorators/types";
 import { eventStore } from "./store/event-store";
 import { textEventStore } from "./store/text-event-store";
+import { getMessageCaption } from "./support";
 import type { SocketClient } from "./types";
 
 const injectFunctionMessage = (
@@ -183,12 +184,7 @@ export class BaileysDecorator {
 
 			if (events["messages.upsert"]) {
 				for (const message of events["messages.upsert"].messages) {
-					let text =
-						message?.message?.conversation ||
-						message?.message?.extendedTextMessage?.text;
-
-					if (!text) continue;
-					text = text.toLowerCase();
+					let text = getMessageCaption(message?.message!).toLowerCase();
 
 					// on-text
 					for (const [key, handlers] of textEventStore.entries()) {

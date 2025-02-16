@@ -1,6 +1,6 @@
 {
   "name": "baileys-decorators",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A TypeScript library for event handling with Baileys",
   "keywords": [
     "baileys",
