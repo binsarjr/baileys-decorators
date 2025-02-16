@@ -1,6 +1,125 @@
-import type { BaileysEventMap, makeWASocket } from "@whiskeysockets/baileys";
+import type { BaileysEventMap } from "@whiskeysockets/baileys";
+import type { WAMessage, WASocket } from "baileys";
+import { DecoratorParameters } from "./decorators/types";
 import { eventStore } from "./store/event-store";
 import { textEventStore } from "./store/text-event-store";
+import type { SocketClient } from "./types";
+
+const injectFunctionMessage = (
+	socket: SocketClient,
+	message: WAMessage | undefined
+) => {
+	if (!message) {
+		socket.reply = async (content, options) => {
+			throw new Error("This Method only work with OnText Decorator");
+		};
+
+		socket.replyWithQuote = async (content, options) => {
+			throw new Error("This Method only work with OnText Decorator");
+		};
+
+		socket.replyWithQuoteInPrivate = async (content, options) => {
+			throw new Error("This Method only work with OnText Decorator");
+		};
+		socket.react = async (emoji) => {
+			throw new Error("This Method only work with OnText Decorator");
+		};
+
+		socket.reactToDone = async () => {
+			throw new Error("This Method only work with OnText Decorator");
+		};
+		socket.reactToProcessing = async () => {
+			throw new Error("This Method only work with OnText Decorator");
+		};
+		socket.reactToFailed = async () => {
+			throw new Error("This Method only work with OnText Decorator");
+		};
+
+		return socket;
+	}
+
+	const react = (emoji: string) => {
+		return socket.sendMessage(message?.key?.remoteJid!, {
+			react: {
+				key: message?.key!,
+				text: emoji,
+			},
+		});
+	};
+
+	return {
+		...socket,
+
+		react,
+
+		reactToProcessing: () => react("⏳"),
+		resetReact: () => react(""),
+		reactToDone: () => react("✅"),
+		reactToFailed: () => react("❌"),
+
+		reply: async (content, options) => {
+			const jid = message?.key?.remoteJid!;
+			if (options?.typing) {
+				await socket.presenceSubscribe(jid);
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				await socket.sendPresenceUpdate("composing", jid);
+				await new Promise((resolve) => setTimeout(resolve, 1_500));
+			}
+
+			const msg = await socket.sendMessage(jid, content, options);
+
+			if (options?.typing) {
+				await socket.sendPresenceUpdate("paused", jid);
+			}
+
+			return msg;
+		},
+
+		replyWithQuote: async (content, options) => {
+			const jid = message?.key?.remoteJid!;
+			if (options?.typing) {
+				await socket.presenceSubscribe(jid);
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				await socket.sendPresenceUpdate("composing", jid);
+				await new Promise((resolve) => setTimeout(resolve, 1_500));
+			}
+
+			const msg = await socket.sendMessage(jid, content, {
+				...options,
+				quoted: message,
+			});
+			if (options?.typing) {
+				await socket.sendPresenceUpdate("paused", jid);
+			}
+
+			return msg;
+		},
+
+		replyWithQuoteInPrivate: async (content, options) => {
+			const jid = message?.key?.participant || message?.key?.remoteJid!;
+
+			if (options?.typing) {
+				await socket.presenceSubscribe(jid);
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				await socket.sendPresenceUpdate("composing", jid);
+				await new Promise((resolve) => setTimeout(resolve, 1_500));
+			}
+
+			const msg = await socket.sendMessage(jid, content, {
+				...options,
+				quoted: message,
+			});
+			if (options?.typing) {
+				await socket.sendPresenceUpdate("paused", jid);
+			}
+
+			return msg;
+		},
+	} as SocketClient;
+};
 
 export class BaileysDecorator {
 	/**
@@ -27,7 +146,7 @@ export class BaileysDecorator {
 		loader(allDecorators);
 	}
 
-	static bind(socket: ReturnType<typeof makeWASocket>) {
+	static bind(socket: WASocket) {
 		socket.ev.process(async (events) => {
 			for (const event of Object.keys(events)) {
 				const eventData = events[event as keyof BaileysEventMap];
@@ -42,9 +161,15 @@ export class BaileysDecorator {
 					for (const [parameterName, decoratorType] of Object.entries(
 						parameters
 					)) {
-						if (decoratorType === "socket") {
-							args[parameterName] = socket;
-						} else if (decoratorType === "baileys-context") {
+						if (decoratorType == DecoratorParameters.Socket.toString()) {
+							const socketArgs = injectFunctionMessage(
+								socket as unknown as SocketClient,
+								undefined
+							);
+							args[parameterName] = socketArgs;
+						} else if (
+							decoratorType === DecoratorParameters.Context.toString()
+						) {
 							args[parameterName] = eventData;
 						}
 					}
@@ -99,8 +224,16 @@ export class BaileysDecorator {
 								const args: any[] = [];
 
 								Object.entries(parameters).forEach(([paramName, paramType]) => {
-									if (paramType === "socket") args.push(socket);
-									if (paramType === "baileys-context") args.push(message);
+									if (paramType === DecoratorParameters.Socket.toString()) {
+										const socketArgs = injectFunctionMessage(
+											socket as unknown as SocketClient,
+											message
+										);
+
+										args.push(socketArgs);
+									}
+									if (paramType === DecoratorParameters.Context.toString())
+										args.push(message);
 								});
 
 								try {
