@@ -1,9 +1,18 @@
+import type { WAMessage } from "baileys";
 import "reflect-metadata";
 import { textEventStore, type TextMatchType } from "../store/text-event-store";
+import type { SocketClient } from "../types";
+import type { DecoratorParameters } from "./types";
+
+export type Middleware = (
+	socket: SocketClient,
+	msg: WAMessage
+) => Promise<boolean> | boolean;
 
 export interface OnTextOptions {
 	matchType?: TextMatchType;
 	priority?: number;
+	middleware?: Middleware[];
 }
 
 export const OnText = (
@@ -12,15 +21,14 @@ export const OnText = (
 ) => {
 	return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
 		const method = descriptor.value;
-		const existingParameters: { [key: string]: "socket" | "baileys-context" } =
+		const existingParameters: { [key: string]: DecoratorParameters } =
 			Reflect.getMetadata("parameters", target, propertyKey) || {};
 		const parameterNames =
 			Reflect.getMetadata("design:paramtypes", target, propertyKey)?.map(
 				(t: any, index: number) => `param${index}`
 			) || [];
 
-		const dynamicParameters: { [key: string]: "socket" | "baileys-context" } =
-			{};
+		const dynamicParameters: { [key: string]: DecoratorParameters } = {};
 		Object.entries(existingParameters).forEach(([key, value], index) => {
 			dynamicParameters[parameterNames[index] || key] = value;
 		});

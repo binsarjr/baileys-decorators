@@ -1,6 +1,7 @@
 // File: onEventDecorator.ts
 import type { BaileysEventMap } from "@whiskeysockets/baileys";
 import { eventStore } from "../store/event-store";
+import type { DecoratorParameters } from "./types";
 
 export const OnEvent = (
 	event: keyof BaileysEventMap,
@@ -9,7 +10,7 @@ export const OnEvent = (
 	return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
 		const method = descriptor.value;
 
-		const parameters: { [key: string]: "socket" | "baileys-context" } =
+		const parameters: { [key: string]: DecoratorParameters } =
 			Reflect.getMetadata("parameters", target, propertyKey) || {};
 
 		if (!eventStore.has(event)) {
