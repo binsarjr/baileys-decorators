@@ -1,5 +1,6 @@
 import type { BaileysEventMap } from "@whiskeysockets/baileys";
 import type { WAMessage, WASocket } from "baileys";
+import { EventOnStartup } from "./decorators/on-startup.decorator";
 import { DecoratorParameters } from "./decorators/types";
 import { eventStore } from "./store/event-store";
 import { textEventStore } from "./store/text-event-store";
@@ -126,6 +127,35 @@ export class BaileysDecorator {
 
 	static bind(socket: WASocket) {
 		socket.ev.process(async (events) => {
+			// on-startup
+			if (events["connection.update"]) {
+				if (events["connection.update"].connection == "open") {
+					for (const { method, parameters, classRef: target } of eventStore.get(
+						EventOnStartup
+					) || []) {
+						const args: { [key: string]: any } = {};
+						const instance = new target();
+
+						for (const [parameterName, decoratorType] of Object.entries(
+							parameters
+						)) {
+							if (decoratorType == DecoratorParameters.Socket.toString()) {
+								const socketArgs = injectFunctionMessage(
+									socket as unknown as SocketClient,
+									undefined
+								);
+								args[parameterName] = socketArgs;
+							}
+						}
+
+						try {
+							await method.bind(instance)(...Object.values(args));
+						} catch (error) {
+							console.error(error);
+						}
+					}
+				}
+			}
 			for (const event of Object.keys(events)) {
 				const eventData = events[event as keyof BaileysEventMap];
 
