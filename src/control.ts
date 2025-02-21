@@ -244,7 +244,10 @@ export class BaileysDecorator {
 									let passed = guards.length === 0;
 									for (const guard of guards) {
 										passed = await guard(
-											socket as unknown as SocketClient,
+											injectFunctionMessage(
+												socket as unknown as SocketClient,
+												message
+											),
 											message
 										);
 										if (!passed) {
