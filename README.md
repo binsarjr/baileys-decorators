@@ -16,7 +16,7 @@
 ## 📦 Installation
 
 ```sh
-bun add baileys-decorators
+bun add github:binsarjr/baileys-decorators
 ```
 
 ## 🛠 Usage
